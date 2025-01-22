@@ -9,14 +9,15 @@ public class IntListExercises {
      * @param lst IntList from Lecture
      */
     public static void addConstant(IntList lst, int c) {
+        if (lst == null) {
+            return;
+        }
         IntList head = lst;
         while (head.rest != null) {
             head.first += c;
             head = head.rest;
-            if (head.rest == null) {
-                head.first += c;
             }
-        }
+        head.first += c;
     }
 
     /**
@@ -55,11 +56,15 @@ public class IntListExercises {
      *  the first digit of x.
      */
     public static boolean firstDigitEqualsLastDigit(int x) {
+        x = Math.abs(x);
+        if (x == 0) {
+            return true;
+        }
         int lastDigit = x % 10;
         while (x >= 10) {
             x = x / 10;
         }
-        int firstDigit = x % 10;
+        int firstDigit = x;
         return firstDigit == lastDigit;
     }
 
