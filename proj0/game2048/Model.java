@@ -9,7 +9,7 @@ import java.util.Observable;
  */
 public class Model extends Observable {
     /** Current contents of the board. */
-    private Board board;
+    private final Board board;
     /** Current score. */
     private int score;
     /** Maximum score so far.  Updated when game ends. */
@@ -106,6 +106,33 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
+
+    public int findtop(int c, int r, boolean flag[]) {
+        int top = 0;
+        for(int i = 1; i < board.size() - r; i ++){
+            if(board.tile(c, r + i) == null) top = i;
+            else if(board.tile(c, r).value() == board.tile(c, r + i).value() && !flag[r + i]) return r + i;
+            else if(board.tile(c, r).value() != board.tile(c, r + i).value()) return r + top;
+        }
+        return r + top;
+    }
+
+    public boolean col(int c) {
+        boolean changed = false;
+        boolean flag[] = new boolean[board.size()];
+        for(int r = board.size() - 2; r >= 0; r--){
+            Tile t = board.tile(c, r);
+            if(t != null){
+                int rt = findtop(c, r, flag);
+                if(rt != r) changed = true;
+                if(board.move(c, rt, t)){
+                    this.score += board.tile(c, rt).value();
+                    flag[rt] = true;
+                }
+            }
+        }
+        return changed;
+    }
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
@@ -113,7 +140,12 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-
+        board.setViewingPerspective(side);
+        for(int i = 0; i < board.size(); i++)
+            if(col(i)){
+                changed = true;
+            }
+        board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
@@ -138,6 +170,10 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        for(int i = 0; i < b.size(); i++)
+            for(int j = 0; j < b.size(); j++)
+                if(b.tile(i, j) == null)
+                    return true;
         return false;
     }
 
@@ -148,6 +184,10 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        for(int i = 0; i < b.size(); i++)
+            for(int j = 0; j < b.size(); j++)
+                if(b.tile(i, j) != null && b.tile(i, j).value() == MAX_PIECE)
+                    return true;
         return false;
     }
 
@@ -159,12 +199,22 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if(Model.emptySpaceExists(b)) return true;
+        for(int i = 0; i < b.size(); i++)
+            for(int j = 0; j < b.size() - 1; j++)
+                if(b.tile(i, j) == null || b.tile(i, j).value() == b.tile(i, j + 1).value())
+                    return true;
+
+        for(int i = 0; i < b.size() - 1; i++)
+            for(int j = 0; j < b.size(); j++)
+                if(b.tile(i, j) == null || b.tile(i, j).value() == b.tile(i + 1, j).value())
+                    return true;
         return false;
     }
 
 
     @Override
-     /** Returns the model as a string, used for debugging. */
+    /** Returns the model as a string, used for debugging. */
     public String toString() {
         Formatter out = new Formatter();
         out.format("%n[%n");
