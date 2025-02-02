@@ -15,27 +15,26 @@ public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
 
     private void resize(int capacity) {
         Item[] a = (Item[]) new Object[capacity];
-        int start = nextFirst + 1;
-        while ((nextFirst + 1 % items.length) != nextLast) {
-            int index = (nextFirst + 1) % items.length;
-            a[start] = items[index];
-            nextFirst = index;
-            start++;
+        int start = (nextFirst + 1) % items.length;
+        for (int i = 0; i < size; i++){
+            a[i] = items[(start + i) % items.length];
         }
+        items = a;
+        nextFirst = items.length - 1;
+        nextLast = size;
     }
 
     public void addFirst(Item x) {
-            if (size == items.length) {
-                resize((int) (size * 2));
-            }
-            items[nextFirst] = x;
-            nextFirst = (nextFirst - 1 + items.length) % items.length;
-            size++;
-
+        if (size == items.length) {
+            resize((int) (size * 1.125));
+        }
+        items[nextFirst] = x;
+        nextFirst = (nextFirst - 1 + items.length) % items.length;
+        size++;
     }
     public void addLast(Item x) {
         if (size == items.length) {
-            resize((int) (size * 2));
+            resize((int) (size * 1.125));
         }
         items[nextLast] = x;
         nextLast = (nextLast + 1) % items.length;
@@ -57,9 +56,10 @@ public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
         if (size == 0) {
             return null;
         } else {
-            Item returnItem = items[nextFirst + 1];
-            items[nextFirst + 1] = null;
-            nextFirst = (nextFirst + 1) % items.length;
+            int index = (nextFirst + 1) % items.length;
+            Item returnItem = items[index];
+            items[index] = null;
+            nextFirst = index;
             size--;
             return returnItem;
         }
@@ -68,8 +68,8 @@ public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
         if (size == 0) {
             return null;
         } else {
-            Item returnItem = items[nextLast - 1];
-            items[nextLast - 1] = null;
+            Item returnItem = items[(nextLast - 1 + items.length) % items.length];
+            items[(nextLast - 1) % items.length] = null;
             nextLast = (nextLast - 1 + items.length) % items.length;
             size--;
             return returnItem;
