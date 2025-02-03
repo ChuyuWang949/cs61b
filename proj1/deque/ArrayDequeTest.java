@@ -38,6 +38,69 @@ public class ArrayDequeTest {
     }
 
     @Test
+    public void fillEmptyFillAgainTest() {
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        // 填充至满（假设初始容量为8）
+        for (int i = 0; i < 8; i++) ad.addLast(i);
+        // 清空
+        for (int i = 0; i < 8; i++) ad.removeFirst();
+        // 再次填充并移除
+        ad.addLast(100);
+        assertEquals(100, (int) ad.removeFirst()); // 检查是否越界
+    }
+
+    @Test
+    public void multiInstanceInteractionTest() {
+        ArrayDeque<String> ad1 = new ArrayDeque<>();
+        ArrayDeque<String> ad2 = new ArrayDeque<>();
+
+        // 操作 ad1
+        ad1.addLast("A");
+        ad1.addLast("B");
+        ad1.removeFirst();
+
+        // 操作 ad2
+        ad2.addLast("X");
+        ad2.addLast("Y");
+        ad2.removeFirst();
+
+        // 验证 ad1 和 ad2 是否独立
+        assertEquals("B", ad1.removeFirst());
+        assertEquals("Y", ad2.removeFirst());
+    }
+
+    @Test
+    public void circularPointerBoundaryTest() {
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        // 强制指针移动到数组末尾
+        ad.addFirst(1);  // 头指针左移
+        ad.addFirst(2);  // 头指针继续左移
+        ad.removeLast(); // 尾指针左移
+
+        // 在边界处添加元素
+        ad.addLast(3);
+        ad.addFirst(4);
+
+        // 预期顺序：4 -> 2 -> 3
+        assertEquals(4, (int) ad.removeFirst());
+        assertEquals(2, (int) ad.removeFirst());
+        assertEquals(3, (int) ad.removeFirst());
+    }
+
+    @Test
+    public void removeAllThenAddTest() {
+        ArrayDeque<Character> ad = new ArrayDeque<>();
+        // 填充并移除所有元素
+        for (char c = 'a'; c <= 'h'; c++) ad.addLast(c);
+        for (int i = 0; i < 8; i++) ad.removeFirst();
+
+        // 确认队列为空后添加新元素
+        assertTrue(ad.isEmpty());
+        ad.addLast('z');
+        assertEquals('z', (char) ad.removeFirst()); // 检查是否越界
+    }
+
+    @Test
     /** Adds an item, then removes an item, and ensures that dll is empty afterwards. */
     public void addRemoveTest() {
 
