@@ -40,17 +40,17 @@ public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
         nextLast = (nextLast + 1) % items.length;
         size++;
     }
-    public boolean isEmpty() {
-        return size == 0;
-    }
+
     public int size() {
         return size;
     }
     public void printDeque() {
-        for(int i = ((nextFirst + 1) % items.length); i < nextLast; ) {
-            System.out.print(items[i] + " ");
-            i  = (i + 1) % items.length;
+        int current = (nextFirst + 1) % items.length;
+        for (int i = 0; i < size; i++) {
+            System.out.print(items[current] + " ");
+            current = (current + 1) % items.length;
         }
+        System.out.println(); // 可选换行
     }
     public Item removeFirst() {
         if (size == 0) {
@@ -60,6 +60,7 @@ public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
             Item returnItem = items[nextFirst];
             items[nextFirst] = null;
             size--;
+            shrinkSize();
             return returnItem;
         }
     }
@@ -71,8 +72,19 @@ public class ArrayDeque<Item> implements Deque<Item>, Iterable<Item> {
             Item returnItem = items[nextLast];
             items[nextLast] = null;
             size--;
+            shrinkSize();
             return returnItem;
         }
+    }
+
+    private void shrinkSize() {
+        if (size < items.length / 4) {
+            if (items.length == 8) {
+                return;
+            }
+            resize((int) (size * 2));
+        }
+
     }
     public Item get(int index) {
         if (index < 0 || index >= size) {
