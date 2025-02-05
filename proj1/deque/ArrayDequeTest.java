@@ -2,6 +2,8 @@ package deque;
 
 import org.junit.Test;
 
+import java.util.Random;
+
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
@@ -213,5 +215,69 @@ public class ArrayDequeTest {
         }
 
 
+    }
+    @Test
+    public void randomizedTest() {
+        ArrayDeque<Integer> ad = new ArrayDeque<>();
+        Random rand = new Random();
+        int totalCalls = 10000; // 总调用次数
+        int[] operationWeights = {3, 3, 1, 1, 1, 1}; // 操作权重：addFirst, addLast, removeFirst, removeLast, isEmpty, size
+
+        for (int i = 0; i < totalCalls; i++) {
+            int operation = getRandomOperation(operationWeights, rand);
+            switch (operation) {
+                case 0: // addFirst
+                    ad.addFirst(rand.nextInt(100));
+                    break;
+                case 1: // addLast
+                    ad.addLast(rand.nextInt(100));
+                    break;
+                case 2: // removeFirst
+                    if (!ad.isEmpty()) {
+                        ad.removeFirst();
+                    }
+                    break;
+                case 3: // removeLast
+                    if (!ad.isEmpty()) {
+                        ad.removeLast();
+                    }
+                    break;
+                case 4: // isEmpty
+                    ad.isEmpty();
+                    break;
+                case 5: // size
+                    ad.size();
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected operation: " + operation);
+            }
+
+            // 检查队列状态是否合法
+            assertTrue("Size should not be negative", ad.size() >= 0);
+            assertTrue("isEmpty should be consistent with size", ad.isEmpty() == (ad.size() == 0));
+        }
+    }
+
+    /**
+     * 根据权重随机选择一个操作
+     *
+     * @param weights 操作权重数组
+     * @param rand    随机数生成器
+     * @return 操作编号（0到weights.length-1）
+     */
+    private int getRandomOperation(int[] weights, Random rand) {
+        int totalWeight = 0;
+        for (int weight : weights) {
+            totalWeight += weight;
+        }
+        int randomValue = rand.nextInt(totalWeight);
+        int cumulativeWeight = 0;
+        for (int i = 0; i < weights.length; i++) {
+            cumulativeWeight += weights[i];
+            if (randomValue < cumulativeWeight) {
+                return i;
+            }
+        }
+        throw new IllegalStateException("Should not reach here");
     }
 }

@@ -33,9 +33,7 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
                     max = get(i);
                 }
             }
-
             return max;
         }
     }
 }
-
