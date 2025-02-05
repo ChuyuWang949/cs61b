@@ -60,7 +60,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             T returnItem = items[nextFirst];
             items[nextFirst] = null;
             size--;
-            // shrinkSize();
+            shrinkSize();
             return returnItem;
         }
     }
@@ -72,7 +72,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             T returnItem = items[nextLast];
             items[nextLast] = null;
             size--;
-            // shrinkSize();
+            shrinkSize();
             return returnItem;
         }
     }
@@ -82,7 +82,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             if (items.length == 8) {
                 return;
             }
-            resize((int) (size * 2));
+            resize((int) (items.length / 2));
         }
 
     }
