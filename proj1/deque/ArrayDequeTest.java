@@ -50,6 +50,21 @@ public class ArrayDequeTest {
     }
 
     @Test
+    public void ArrayEqualsLinked() {
+        Deque<Integer> ad = new ArrayDeque<>();
+        Deque<Integer> lld = new LinkedListDeque<>();
+
+        // 填充并比较
+        for (int i = 0; i < 100; i++) {
+            ad.addLast(i);
+            lld.addLast(i);
+        }
+
+        // 比较大小
+        assertEquals(ad.size(), lld.size());
+        assertEquals(ad.equals(lld), true);
+    }
+    @Test
     public void multiInstanceInteractionTest() {
         ArrayDeque<String> ad1 = new ArrayDeque<>();
         ArrayDeque<String> ad2 = new ArrayDeque<>();
