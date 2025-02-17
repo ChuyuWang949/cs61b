@@ -14,4 +14,8 @@ public class StageUtils {
     public static void saveStage() {
         writeObject(Repository.STAGING_AREA, new StagingArea());
     }
+
+    public static StagingArea getStage() {
+        return readObject(Repository.STAGING_AREA, StagingArea.class);
+    }
 }

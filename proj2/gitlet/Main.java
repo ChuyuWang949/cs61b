@@ -41,25 +41,25 @@ public class Main {
                 commandRunner(restArgs.length == 0, Repository::log);
                 break;
             case "global-log":
-                // TODO: handle the `global-log` command
+                commandRunner(restArgs.length == 0, Repository::globalLog);
                 break;
             case "find":
-                // TODO: handle the `find` command
+                commandRunner(restArgs.length == 1, Repository::find, restArgs[0]);
                 break;
             case "status":
-                // TODO: handle the `status` command
+                commandRunner(restArgs.length == 0, Repository::status);
                 break;
             case "checkout":
                 commandRunner(restArgs.length >= 1 && restArgs.length <= 3, Repository::checkout, restArgs);
                 break;
             case "branch":
-                // TODO: handle the `branch` command
+                commandRunner(restArgs.length == 1, Repository::branch, restArgs[0]);
                 break;
             case "rm-branch":
-                // TODO: handle the `rm-branch` command
+                commandRunner(restArgs.length == 1, Repository::rmBranch, restArgs[0]);
                 break;
             case "reset":
-                // TODO: handle the `reset` command
+                commandRunner(restArgs.length == 1, Repository::reset, restArgs[0]);
                 break;
             case "merge":
                 // TODO: handle the `merge` command
