@@ -10,13 +10,14 @@ import java.util.function.Consumer;
 public class Main {
 
     /** Usage: java gitlet.Main ARGS, where ARGS contains
-     *  <COMMAND> <OPERAND1> <OPERAND2> ... 
+     *  <COMMAND> <OPERAND1> <OPERAND2> ...
      */
     public static void main(String[] args) {
         if (args.length == 0) {
             System.out.println("Please enter a command.");
             System.exit(0);
         }
+
         String firstArg = args[0];
         String[] restArgs = Arrays.copyOfRange(args, 1, args.length);
         switch(firstArg) {
@@ -37,7 +38,7 @@ public class Main {
                 commandRunner(restArgs.length == 1, Repository::rm, restArgs[0]);
                 break;
             case "log":
-                // TODO: handle the `log` command
+                commandRunner(restArgs.length == 0, Repository::log);
                 break;
             case "global-log":
                 // TODO: handle the `global-log` command
@@ -49,7 +50,7 @@ public class Main {
                 // TODO: handle the `status` command
                 break;
             case "checkout":
-                // TODO: handle the `checkout` command
+                commandRunner(restArgs.length >= 1 && restArgs.length <= 3, Repository::checkout, restArgs);
                 break;
             case "branch":
                 // TODO: handle the `branch` command

@@ -2,35 +2,35 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static gitlet.Utils.*;
 
 public class StagingArea implements Serializable {
-    private static HashMap<String, String> addedFile;
-    private static HashSet<String> removedFile;
+    private TreeMap<String, String> addedFile;
+    private TreeSet<String> removedFile;
 
     public StagingArea() {
-        addedFile = new HashMap<>();
-        removedFile = new HashSet<>();
+        addedFile = new TreeMap<>();
+        removedFile = new TreeSet<>();
     }
 
-    public HashMap<String, String> getAddedFile() {
+    public TreeMap<String, String> getAddedFile() {
         return addedFile;
     }
 
-    public HashSet<String> getRemovedFile() {
+    public TreeSet<String> getRemovedFile() {
         return removedFile;
     }
 
     public void addFileToAdded(String fileName, String fileID) {
         if (addedFile == null) {
-            addedFile = new HashMap<>();
+            addedFile = new TreeMap<>();
         }
         addedFile.put(fileName, fileID);
         if (removedFile == null) {
-            removedFile = new HashSet<>();
+            removedFile = new TreeSet<>();
         } else {
             removedFile.remove(fileName);
         }
@@ -42,23 +42,13 @@ public class StagingArea implements Serializable {
 
     public void addFileToRemoved(String fileName) {
         if (removedFile == null) {
-            removedFile = new HashSet<>();
+            removedFile = new TreeSet<>();
         }
         removedFile.add(fileName);
         if (addedFile == null) {
-            addedFile = new HashMap<>();
+            addedFile = new TreeMap<>();
         } else {
             addedFile.remove(fileName);
         }
-    }
-
-    public void clean() {
-        addedFile = null; // maybe risky pay attention!
-        removedFile = null;
-    }
-
-    public void saveStage() {
-        File stageFile = join(Repository.STAGING_AREA, "stage");
-        writeObject(stageFile, new StagingArea());
     }
 }

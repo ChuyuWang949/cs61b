@@ -3,11 +3,11 @@ package gitlet;
 // TODO: any imports you need here
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date; // TODO: You'll likely use this in this class
-import java.util.HashMap;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static gitlet.Utils.serialize;
+import static gitlet.Utils.sha1;
 
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
@@ -27,24 +27,20 @@ public class Commit implements Serializable  {
 
     /** The message of this Commit. */
     private String message;
-    private HashMap<String, String> FileSnapshots;
+    private TreeMap<String, String> FileSnapshots;
     private String parent;
     private String secondparent;
 
 
     /* TODO: fill in the rest of this class. */
     // TODO: finish the logic of FileSnapshots
-    public Commit(String message, String parent) {
-        this.message = message;
-        this.parent = parent;
-        this.timestamp = new Date();
-    }
 
     public Commit() {
         this.message = "initial commit";
         this.timestamp = new Date(0);
         this.parent = null;
         this.secondparent = null;
+        this.FileSnapshots = new TreeMap<>();
     }
 
     public String getParent() {
@@ -63,7 +59,7 @@ public class Commit implements Serializable  {
         return this.secondparent;
     }
 
-    public HashMap<String, String> getFileSnapshots() {
+    public TreeMap<String, String> getFileSnapshots() {
         return this.FileSnapshots;
     }
 
@@ -71,7 +67,7 @@ public class Commit implements Serializable  {
         this.timestamp = timestamp;
     }
 
-    public void setFileSnapshots(HashMap<String, String> FileSnapshots) {
+    public void setFileSnapshots(TreeMap<String, String> FileSnapshots) {
         this.FileSnapshots = FileSnapshots;
     }
 
@@ -88,5 +84,15 @@ public class Commit implements Serializable  {
     }
 
     public void printCommitInfo() {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d HH:mm:ss yyyy Z", Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT-8"));
+        System.out.println("===");
+        System.out.println("commit " + CommitsUtils.getCommitID(this));
+        if (secondparent != null) {
+            System.out.println("Merge: " + parent.substring(0, 7) + " " + secondparent.substring(0, 7));
+        }
+        System.out.println("Date: " + sdf.format(this.timestamp));
+        System.out.println(this.message);
+        System.out.println();
     }
 }
