@@ -72,8 +72,10 @@ public class Main {
     public static <T1, T2> void commandRunner (Boolean argsLength, BiConsumer<T1, T2> command, T1 args1, T2 args2) {
         if (!Repository.isinitialized()) {
             System.out.println(UNINITIALIZED_WARNING);
+            return;
         } else if (!argsLength) {
             System.out.println(INCORRECT_OPERANDS_WARNING);
+            return;
         }
         command.accept(args1, args2);
     }
@@ -81,8 +83,10 @@ public class Main {
     public static <T> void commandRunner (Boolean argsLength, Consumer<T> command, T args) {
         if (!Repository.isinitialized()) {
             System.out.println(UNINITIALIZED_WARNING);
+            return;
         } else if (!argsLength) {
             System.out.println(INCORRECT_OPERANDS_WARNING);
+            return;
         }
         command.accept(args);
     }
@@ -90,8 +94,10 @@ public class Main {
     public static void commandRunner (Boolean argsLength, Runnable command) {
         if (!Repository.isinitialized()) {
             System.out.println(UNINITIALIZED_WARNING);
+            return;
         } else if (!argsLength) {
             System.out.println(INCORRECT_OPERANDS_WARNING);
+            return;
         }
         command.run();
     }
