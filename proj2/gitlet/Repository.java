@@ -66,7 +66,7 @@ public class Repository {
             String fileID = sha1(readContents(file));
             Commit currentCommit = CommitsUtils.getCurrentCommit();
             StagingArea index = readObject(STAGING_AREA, StagingArea.class);
-            TreeMap<String, String> CurrentVersion = currentCommit.getFileSnapshots();
+            TreeMap<String, String> CurrentVersion = currentCommit.getFilesnapshots();
             TreeMap<String, String> CurrentStaged = index.getAddedFile();
 
             if (CurrentVersion.containsKey(fileName) && CurrentVersion.get(fileName).equals(fileID)) { // if the file is in the current commit
@@ -96,7 +96,7 @@ public class Repository {
             newCommit.setTimestamp(new Date());
 
             // based on the current commit and the staging area generate the new commit
-            newCommit.setFileSnapshots(CommitsUtils.mergeSnapshots(currentCommit, index));
+            newCommit.setFilesnapshots(CommitsUtils.mergeSnapshots(currentCommit, index));
             StageUtils.saveBlobs(index.getAddedFile()); // save the staged file to the blobs
 
             StageUtils.saveStage(); // clean and save the staging area
@@ -115,7 +115,7 @@ public class Repository {
             StagingArea index = readObject(STAGING_AREA, StagingArea.class);
 
             TreeMap<String, String> indexAdded = index.getAddedFile();
-            TreeMap<String, String> CurrentTracked = currentCommit.getFileSnapshots();
+            TreeMap<String, String> CurrentTracked = currentCommit.getFilesnapshots();
 
             if (indexAdded.containsKey(fileName)) { // if the file is staged for addition
                 index.removeFileFromAdded(fileName); // remove the file from the staging area
@@ -154,25 +154,25 @@ public class Repository {
             } else if (currentBranch == BranchName) {
                 System.out.println("No need to checkout the current branch.");
             } else {
-                TreeMap<String, String> currentFileSnapshots = CommitsUtils.getCurrentCommit().getFileSnapshots();
-                TreeMap<String, String> givenFileSnapshots = CommitsUtils.getCommit(readContentsAsString(head)).getFileSnapshots();
-                for (String filename : givenFileSnapshots.keySet()) {
-                    if (!currentFileSnapshots.containsKey(filename)) {
+                TreeMap<String, String> currentFilesnapshots = CommitsUtils.getCurrentCommit().getFilesnapshots();
+                TreeMap<String, String> givenFilesnapshots = CommitsUtils.getCommit(readContentsAsString(head)).getFilesnapshots();
+                for (String filename : givenFilesnapshots.keySet()) {
+                    if (!currentFilesnapshots.containsKey(filename)) {
                         System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
                         System.exit(0);
                     }
                 } // check if there is any untracked file in the way before do anything else
 
-                for (String filename : currentFileSnapshots.keySet()) {
-                    if (!givenFileSnapshots.containsKey(filename)) {
+                for (String filename : currentFilesnapshots.keySet()) {
+                    if (!givenFilesnapshots.containsKey(filename)) {
                         File file = join(CWD, filename);
                         if (file.exists()) {
                             restrictedDelete(file);
                         }
                     } else {
-                        if (!currentFileSnapshots.get(filename).equals(givenFileSnapshots.get(filename))) {
+                        if (!currentFilesnapshots.get(filename).equals(givenFilesnapshots.get(filename))) {
                             File file = join(CWD, filename);
-                            writeContents(file, readContents(join(BLOBS, givenFileSnapshots.get(filename))));
+                            writeContents(file, readContents(join(BLOBS, givenFilesnapshots.get(filename))));
                         }
                     }
                 }
@@ -182,11 +182,12 @@ public class Repository {
             }
         } else if (strings.length == 2) {
             String filename = strings[1];
-            if (!CommitsUtils.getCurrentCommit().getFileSnapshots().containsKey(filename)) {
+            if (!CommitsUtils.getCurrentCommit().getFilesnapshots().containsKey(filename)) {
                 System.out.println("File does not exist in the current commit.");
             } else {
                 File file = join(CWD, filename);
-                writeContents(file, readContents(join(BLOBS, CommitsUtils.getCurrentCommit().getFileSnapshots().get(filename))));
+                TreeMap<String, String> currentFilesnapshots = CommitsUtils.getCurrentCommit().getFilesnapshots();
+                writeContents(file, readContents(join(BLOBS, currentFilesnapshots.get(filename))));
             }
         } else {
             String commitID = strings[0];
@@ -196,9 +197,9 @@ public class Repository {
                 System.out.println("No commit with that id exists.");
             } else {
                 Commit commit = CommitsUtils.getCommit(commitID);
-                if (commit.getFileSnapshots().containsKey(fileName)) {
+                if (commit.getFilesnapshots().containsKey(fileName)) {
                     File file = join(CWD, fileName);
-                    writeContents(file, readContents(join(BLOBS, commit.getFileSnapshots().get(fileName))));
+                    writeContents(file, readContents(join(BLOBS, commit.getFilesnapshots().get(fileName))));
                 } else {
                     System.out.println("File does not exist in that commit.");
                 }
@@ -238,7 +239,7 @@ public class Repository {
 
     public static void status() {
         Commit currentCommit = CommitsUtils.getCurrentCommit();
-        TreeMap<String, String> CurrentTracked = currentCommit.getFileSnapshots();
+        TreeMap<String, String> CurrentTracked = currentCommit.getFilesnapshots();
         TreeMap<String, String> StagingAdded = StageUtils.getStage().getAddedFile();
         TreeSet<String> StagingRemoved = StageUtils.getStage().getRemovedFile();
 
@@ -324,7 +325,7 @@ public class Repository {
         } else {
             Commit commit = CommitsUtils.getCommit(commitID);
             for (String fileName : plainFilenamesIn(CWD)) {
-                if (!commit.getFileSnapshots().containsKey(fileName)) {
+                if (!commit.getFilesnapshots().containsKey(fileName)) {
                     File file = join(CWD, fileName);
                     file.delete();
                 } else {
@@ -363,9 +364,9 @@ public class Repository {
                 return;
             }
 
-            TreeMap<String, String> commonSnapshots = CommitsUtils.getSplitPoint(currentCommit, givenCommit).getFileSnapshots();
-            TreeMap<String, String> currentSnapshots = currentCommit.getFileSnapshots();
-            TreeMap<String, String> givenSnapshots = givenCommit.getFileSnapshots();
+            TreeMap<String, String> commonSnapshots = CommitsUtils.getSplitPoint(currentCommit, givenCommit).getFilesnapshots();
+            TreeMap<String, String> currentSnapshots = currentCommit.getFilesnapshots();
+            TreeMap<String, String> givenSnapshots = givenCommit.getFilesnapshots();
             for (String path : plainFilenamesIn(CWD)) { // all file in working directory
                 if (join(path).isDirectory()) {
                     continue;

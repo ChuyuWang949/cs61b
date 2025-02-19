@@ -22,20 +22,20 @@ public class Commit implements Serializable  {
 
     /** The message of this Commit. */
     private String message;
-    private TreeMap<String, String> FileSnapshots;
+    private TreeMap<String, String> Filesnapshots;
     private String parent;
     private String secondparent;
 
 
     /* TODO: fill in the rest of this class. */
-    // TODO: finish the logic of FileSnapshots
+    // TODO: finish the logic of Filesnapshots
 
     public Commit() {
         this.message = "initial commit";
         this.timestamp = new Date(0);
         this.parent = null;
         this.secondparent = null;
-        this.FileSnapshots = new TreeMap<>();
+        this.Filesnapshots = new TreeMap<>();
     }
 
     public String getParent() {
@@ -54,16 +54,16 @@ public class Commit implements Serializable  {
         return this.secondparent;
     }
 
-    public TreeMap<String, String> getFileSnapshots() {
-        return this.FileSnapshots;
+    public TreeMap<String, String> getFilesnapshots() {
+        return this.Filesnapshots;
     }
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 
-    public void setFileSnapshots(TreeMap<String, String> FileSnapshots) {
-        this.FileSnapshots = FileSnapshots;
+    public void setFilesnapshots(TreeMap<String, String> Filesnapshots) {
+        this.Filesnapshots = Filesnapshots;
     }
 
     public void setParent(String parent) {

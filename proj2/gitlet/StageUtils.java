@@ -1,7 +1,6 @@
 package gitlet;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.TreeMap;
 
 import static gitlet.Utils.*;

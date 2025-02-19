@@ -1,11 +1,8 @@
 package gitlet;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import static gitlet.Utils.*;
 
 public class StagingArea implements Serializable {
     private TreeMap<String, String> addedFile;

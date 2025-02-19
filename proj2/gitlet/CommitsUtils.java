@@ -38,7 +38,7 @@ public class CommitsUtils {
     public static TreeMap<String, String> mergeSnapshots(Commit currentCommit, StagingArea index) {
         TreeMap<String, String> mergedSnapshots = new TreeMap<>();
         if (currentCommit != null) {
-            mergedSnapshots.putAll(currentCommit.getFileSnapshots());
+            mergedSnapshots.putAll(currentCommit.getFilesnapshots());
         }
         mergedSnapshots.putAll(index.getAddedFile());
         for(String fileName : index.getRemovedFile()) {
@@ -91,13 +91,13 @@ public class CommitsUtils {
 
     public static boolean isConsistent(String filename, Commit currentCommit, Commit givenCommit) {
         assert currentCommit != null && givenCommit != null && filename != null;
-        if (currentCommit.getFileSnapshots().containsKey(filename) && givenCommit.getFileSnapshots().containsKey(filename)) {
-            if (currentCommit.getFileSnapshots().get(filename).equals(givenCommit.getFileSnapshots().get(filename))) {
+        if (currentCommit.getFilesnapshots().containsKey(filename) && givenCommit.getFilesnapshots().containsKey(filename)) {
+            if (currentCommit.getFilesnapshots().get(filename).equals(givenCommit.getFilesnapshots().get(filename))) {
                 return true;
             } else {
                 return false;
             }
-        } else if (!currentCommit.getFileSnapshots().containsKey(filename) && !givenCommit.getFileSnapshots().containsKey(filename)) {
+        } else if (!currentCommit.getFilesnapshots().containsKey(filename) && !givenCommit.getFilesnapshots().containsKey(filename)) {
             return true;
         } else {
             return false;
@@ -130,6 +130,6 @@ public class CommitsUtils {
         List<String> files = plainFilenamesIn(Repository.CWD);
         Commit currentCommit = getCurrentCommit();
         assert currentCommit != null && files != null;
-        return files.contains(filename) && !currentCommit.getFileSnapshots().containsKey(filename);
+        return files.contains(filename) && !currentCommit.getFilesnapshots().containsKey(filename);
     }
 }
