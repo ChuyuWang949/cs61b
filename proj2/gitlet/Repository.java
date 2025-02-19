@@ -278,20 +278,23 @@ public class Repository {
             String currentFileID = sha1(readContents(file));
             boolean currentHas = currentTracked.containsKey(fileName);
             boolean stagedHas = stagingAdded.containsKey(fileName);
-            boolean isSamecurrent = currentTracked.get(fileName).equals(currentFileID);
-            boolean isSamestaged = stagingAdded.get(fileName).equals(currentFileID);
+
             // if file is a directory
             if (file.isDirectory()) {
                 continue;
             }
 
             if (stagedHas) {
+                boolean isSamestaged = stagingAdded.get(fileName).equals(currentFileID);
                 if (!isSamestaged) {
                     System.out.println(fileName + " (modified)");
                 }
             } else {
-                if (currentHas && !isSamecurrent) {
-                    System.out.println(fileName + " (modified)");
+                if (currentHas) {
+                    boolean isSamecurrent = currentTracked.get(fileName).equals(currentFileID);
+                    if (!isSamecurrent) {
+                        System.out.println(fileName + " (modified)");
+                    }
                 }
             }
         }
