@@ -62,7 +62,7 @@ public class Main {
                 commandRunner(restArgs.length == 1, Repository::reset, restArgs[0]);
                 break;
             case "merge":
-                // TODO: handle the `merge` command
+                commandRunner(restArgs.length == 1, Repository::merge, restArgs[0]);
                 break;
         }
     }

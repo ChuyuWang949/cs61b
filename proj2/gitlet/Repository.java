@@ -108,7 +108,7 @@ public class Repository {
 
             // based on the current commit and the staging area generate the new commit
             newCommit.setFileSnapshots(CommitsUtils.mergeSnapshots(currentCommit, index));
-            BlobsUtils.saveBlobs(index.getAddedFile()); // save the staged file to the blobs // TODO：a file exist both in added and removed?
+            StageUtils.saveBlobs(index.getAddedFile()); // save the staged file to the blobs // TODO：a file exist both in added and removed?
 
             StageUtils.saveStage(); // clean and save the staging area
 
@@ -346,6 +346,96 @@ public class Repository {
             }
             StageUtils.saveStage();
             CommitsUtils.setHEAD(commitID);
+        }
+    }
+
+    public static void merge(String givenbranch) {
+        if (!join(refs_heads, givenbranch).exists()) {
+            System.out.println("A branch with that name does not exist.");
+            return;
+        } else if (givenbranch.equals(readContentsAsString(Repository.HEAD))) {
+            System.out.println("Cannot merge a branch with itself.");
+            return;
+        } else if (!StageUtils.isemptyStage()) {
+            System.out.println("You have uncommitted changes.");
+            return;
+        } else {
+            Commit currentCommit = CommitsUtils.getCurrentCommit();
+            Commit givenCommit = CommitsUtils.getCommit(readContentsAsString(join(refs_heads, givenbranch)));
+
+            if (CommitsUtils.isAncestor(currentCommit, givenCommit)) {
+                String[] args = {givenbranch};
+                checkout(args);
+                System.out.println("Current branch fast-forwarded.");
+                return;
+            }
+
+            if (CommitsUtils.isAncestor(givenCommit, currentCommit)) {
+                System.out.println("Given branch is an ancestor of the current branch.");
+                return;
+            }
+
+            TreeMap<String, String> commonSnapshots = CommitsUtils.getSplitPoint(currentCommit, givenCommit).getFileSnapshots();
+            TreeMap<String, String> currentSnapshots = currentCommit.getFileSnapshots();
+            TreeMap<String, String> givenSnapshots = givenCommit.getFileSnapshots();
+            for (String path : plainFilenamesIn(CWD)) { // all file in working directory
+                if (join(path).isDirectory()) {
+                    continue;
+                }
+                if (!currentSnapshots.containsKey(path)) {
+                    if (givenSnapshots.containsKey(path)) {
+                        String fileID = sha1(readContents(join(CWD, path)));
+                        if (!givenSnapshots.get(path).equals(fileID)) {
+                            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                            return;
+                        }
+                    }
+                }
+            }
+            TreeSet<String> filesList = new TreeSet<>();
+            filesList.addAll(currentSnapshots.keySet());
+            filesList.addAll(givenSnapshots.keySet());
+            filesList.addAll(commonSnapshots.keySet());
+
+            for (String fileName : filesList) {
+                Boolean splitgivenConsistent = CommitsUtils.isConsistent(fileName, currentCommit, givenCommit);
+                Boolean splitcurrentConsistent = CommitsUtils.isConsistent(fileName, givenCommit, currentCommit);
+                Boolean currentgivenConsistent = CommitsUtils.isConsistent(fileName, currentCommit, givenCommit);
+
+                // case 1,2: 010 011
+                if (!splitgivenConsistent && splitcurrentConsistent) {
+                    if (CommitsUtils.isUntracked(fileName)) {
+                        System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                        return;
+                    }
+                    if (!givenSnapshots.containsKey(fileName)) {
+                        rm(fileName);
+                    } else {
+                        String[] args = {givenbranch, "--", fileName};
+                        checkout(args);
+                        add(fileName);
+                    }
+                }
+
+                if (!splitgivenConsistent && !splitcurrentConsistent && !currentgivenConsistent) {
+                    if (CommitsUtils.isUntracked(fileName)) {
+                        System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                        return;
+                    }
+                    File file = join(CWD, fileName);
+                    String contentv1 = currentSnapshots.containsKey(fileName) ? readContentsAsString(join(CWD, fileName)) : "";
+                    String contentv2 = givenSnapshots.containsKey(fileName) ? readContentsAsString(join(CWD, fileName)) : "";
+                    String content = StageUtils.merge(contentv1, contentv2);
+                    writeContents(file, content);
+                    add(fileName);
+                    System.out.println("Encountered a merge conflict.");
+                }
+
+                commit("Merged " + givenbranch + " into " + readContentsAsString(Repository.HEAD) + ".");
+                Commit mergeCommit = CommitsUtils.getCurrentCommit();
+                mergeCommit.setSecondparent(CommitsUtils.getCommitID(givenCommit));
+                CommitsUtils.setHEAD(CommitsUtils.saveCommit(mergeCommit));
+            }
         }
     }
 }
