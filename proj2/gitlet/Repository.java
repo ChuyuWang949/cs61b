@@ -121,7 +121,6 @@ public class Repository {
             restrictedDelete(file);
         }
         writeObject(STAGING_AREA, index);
-
     }
 
     public static void log() {
@@ -195,11 +194,10 @@ public class Repository {
             }
             String commitID = strings[0];
             String fileName = strings[2];
-            File commitFile = join(COMMITS, commitID);
-            if (!commitFile.exists()) {
+            Commit commit = commitID.length() == 6 ? getCommitabbreviate(commitID) : getCommit(commitID);
+            if (commit == null) {
                 System.out.println("No commit with that id exists.");
             } else {
-                Commit commit = commitID.length() == 6 ? getCommitabbreviate(commitID) : getCommit(commitID);
                 TreeMap<String, String> commitFilesnapshots = commit.getFileSnapshots();
                 if (commitFilesnapshots.containsKey(fileName)) {
                     File file = join(CWD, fileName);
@@ -391,20 +389,11 @@ public class Repository {
             TreeMap<String, String> commonSnapshots = splitPoint.getFileSnapshots();
             TreeMap<String, String> currentSnapshots = currentCommit.getFileSnapshots();
             TreeMap<String, String> givenSnapshots = givenCommit.getFileSnapshots();
-            for (String path : plainFilenamesIn(CWD)) { // all file in working directory
-                if (!currentSnapshots.containsKey(path)) {
-                    if (givenSnapshots.containsKey(path)) {
-                        String fileID = sha1(readContents(join(CWD, path)));
-                        if (!givenSnapshots.get(path).equals(fileID)) {
-                            System.out.println(MERGE_MODIFY_UNTRACKED_WARNING);
-                            return;
-                        }
-                    }
-                }
-            }
+
             TreeSet<String> filesList = new TreeSet<>(currentSnapshots.keySet());
             filesList.addAll(givenSnapshots.keySet());
             filesList.addAll(commonSnapshots.keySet());
+            int flag = 0;
             for (String fileName : filesList) {
                 Boolean splitgivenConsistent = isConsistent(fileName, splitPoint, givenCommit);
                 Boolean splitcurrentConsistent = isConsistent(fileName, splitPoint, currentCommit);
@@ -417,7 +406,8 @@ public class Repository {
                     if (!givenSnapshots.containsKey(fileName)) {
                         rm(fileName);
                     } else {
-                        String[] args = {givenbranch, "--", fileName};
+                        String branchHead = readContentsAsString(join(REFS_HEAD, givenbranch));
+                        String[] args = {branchHead, "--", fileName};
                         checkout(args);
                         add(fileName);
                     }
@@ -435,12 +425,15 @@ public class Repository {
                     String content = StageUtils.merge(contentv1, contentv2);
                     writeContents(file, content);
                     add(fileName);
-                    System.out.println("Encountered a merge conflict.");
+                    flag = 1;
                 }
-                commit("Merged " + givenbranch + " into " + readContentsAsString(HEAD) + ".");
-                Commit mergeCommit = getCurrentCommit();
-                mergeCommit.setSecondparent(getCommitID(givenCommit));
-                setHEAD(saveCommit(mergeCommit));
+            }
+            commit("Merged " + givenbranch + " into " + readContentsAsString(HEAD) + ".");
+            Commit mergeCommit = getCurrentCommit();
+            mergeCommit.setSecondparent(getCommitID(givenCommit));
+            setHEAD(saveCommit(mergeCommit));
+            if (flag == 1) {
+                System.out.println("Encountered a merge conflict.");
             }
         }
     }
