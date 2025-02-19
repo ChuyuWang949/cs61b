@@ -106,7 +106,9 @@ public class CommitsUtils {
         TreeMap<String, String> givenSnapshots = givenCommit.getFileSnapshots();
         if (currentSnapshots.containsKey(filename) && givenSnapshots.containsKey(filename)) {
             return currentSnapshots.get(filename).equals(givenSnapshots.get(filename));
-        } else return !currentSnapshots.containsKey(filename) && !givenSnapshots.containsKey(filename);
+        } else {
+            return !currentSnapshots.containsKey(filename) && !givenSnapshots.containsKey(filename);
+        }
     }
 
     public static boolean isAncestor(Commit fatherCommit, Commit childCommit) {

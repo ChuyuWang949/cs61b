@@ -194,7 +194,7 @@ public class Repository {
             }
             String commitID = strings[0];
             String fileName = strings[2];
-            Commit commit = commitID.length() == 6 ? getCommitabbreviate(commitID) : getCommit(commitID);
+            Commit commit = commitID.length() < 40 ? getCommitabbreviate(commitID) : getCommit(commitID);
             if (commit == null) {
                 System.out.println("No commit with that id exists.");
             } else {
@@ -393,7 +393,6 @@ public class Repository {
             TreeSet<String> filesList = new TreeSet<>(currentSnapshots.keySet());
             filesList.addAll(givenSnapshots.keySet());
             filesList.addAll(commonSnapshots.keySet());
-            int flag = 0;
             for (String fileName : filesList) {
                 Boolean splitgivenConsistent = isConsistent(fileName, splitPoint, givenCommit);
                 Boolean splitcurrentConsistent = isConsistent(fileName, splitPoint, currentCommit);
@@ -403,6 +402,20 @@ public class Repository {
                         System.out.println(MERGE_MODIFY_UNTRACKED_WARNING);
                         return;
                     }
+                }
+                if (!splitgivenConsistent && !splitcurrentConsistent && !currentgivenConsistent) {
+                    if (isUntracked(fileName)) {
+                        System.out.println(MERGE_MODIFY_UNTRACKED_WARNING);
+                        return;
+                    }
+                }
+            }
+            int flag = 0;
+            for (String fileName : filesList) {
+                Boolean splitgivenConsistent = isConsistent(fileName, splitPoint, givenCommit);
+                Boolean splitcurrentConsistent = isConsistent(fileName, splitPoint, currentCommit);
+                Boolean currentgivenConsistent = isConsistent(fileName, currentCommit, givenCommit);
+                if (!splitgivenConsistent && splitcurrentConsistent) {
                     if (!givenSnapshots.containsKey(fileName)) {
                         rm(fileName);
                     } else {
@@ -413,15 +426,11 @@ public class Repository {
                     }
                 }
                 if (!splitgivenConsistent && !splitcurrentConsistent && !currentgivenConsistent) {
-                    if (isUntracked(fileName)) {
-                        System.out.println(MERGE_MODIFY_UNTRACKED_WARNING);
-                        return;
-                    }
                     File file = join(CWD, fileName);
                     String contentv1 = currentSnapshots.containsKey(fileName) ?
-                            readContentsAsString(join(CWD, fileName)) : "";
+                            readContentsAsString(join(BLOBS, currentSnapshots.get(fileName))) : "";
                     String contentv2 = givenSnapshots.containsKey(fileName) ?
-                            readContentsAsString(join(CWD, fileName)) : "";
+                            readContentsAsString(join(BLOBS, givenSnapshots.get(fileName))) : "";
                     String content = StageUtils.merge(contentv1, contentv2);
                     writeContents(file, content);
                     add(fileName);
