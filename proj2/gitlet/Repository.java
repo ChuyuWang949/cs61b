@@ -128,8 +128,11 @@ public class Repository {
                 }
             } else if (!currentTracked.containsKey(fileName)) {
                 System.out.println("No reason to remove the file.");
+            } else {
+                index.addFileToRemoved(fileName);
+                restrictedDelete(file);
             }
-            writeObject(STAGING_AREA, index); // 忘记保存rm状态了
+            writeObject(STAGING_AREA, index); // dont forget to save the staging area
         }
     }
 
