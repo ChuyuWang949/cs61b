@@ -206,7 +206,7 @@ public class Repository {
                 writeContents(file, readContents(join(BLOBS, currentFilesnapshots.get(filename))));
             }
         } else {
-            if (strings[1] != "--") {
+            if (!strings[1].equals("--")) {
                 System.out.println("Incorrect operands.");
                 System.exit(0);
             }
