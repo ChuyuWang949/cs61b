@@ -3,7 +3,7 @@ package gitlet;
 import java.util.Arrays;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-
+import static gitlet.GitletConstants.*;
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author TODO
  */
@@ -64,32 +64,34 @@ public class Main {
             case "merge":
                 commandRunner(restArgs.length == 1, Repository::merge, restArgs[0]);
                 break;
+            default:
+                System.out.println("No command with that name exists.");
         }
     }
 
     public static <T1, T2> void commandRunner (Boolean argsLength, BiConsumer<T1, T2> command, T1 args1, T2 args2) {
         if (!Repository.isinitialized()) {
-            System.out.println("UNINTIALIZED_WARNING");
+            System.out.println(UNINITIALIZED_WARNING);
         } else if (!argsLength) {
-            System.out.println("INCORRECT_OPERANDS_WARNING");
+            System.out.println(INCORRECT_OPERANDS_WARNING);
         }
         command.accept(args1, args2);
     }
 
     public static <T> void commandRunner (Boolean argsLength, Consumer<T> command, T args) {
         if (!Repository.isinitialized()) {
-            System.out.println("UNINTIALIZED_WARNING");
+            System.out.println(UNINITIALIZED_WARNING);
         } else if (!argsLength) {
-            System.out.println("INCORRECT_OPERANDS_WARNING");
+            System.out.println(INCORRECT_OPERANDS_WARNING);
         }
         command.accept(args);
     }
 
     public static void commandRunner (Boolean argsLength, Runnable command) {
         if (!Repository.isinitialized()) {
-            System.out.println("UNINTIALIZED_WARNING");
+            System.out.println(UNINITIALIZED_WARNING);
         } else if (!argsLength) {
-            System.out.println("INCORRECT_OPERANDS_WARNING");
+            System.out.println(INCORRECT_OPERANDS_WARNING);
         }
         command.run();
     }

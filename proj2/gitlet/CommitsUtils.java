@@ -4,30 +4,30 @@ import java.io.File;
 import java.util.*;
 
 import static gitlet.Utils.*;
-
+import static gitlet.GitletConstants.*;
 public class CommitsUtils {
     public static String saveCommit(Commit commit) {
         String commitID = getCommitID(commit);
-        File commitFile = join(Repository.COMMITS, commitID);
+        File commitFile = join(COMMITS, commitID);
         writeObject(commitFile, commit);
         return commitID;
     }
 
     public static Commit getCommit(String commitID) {
-        if (!join(Repository.COMMITS, commitID).exists()) {
+        if (!join(COMMITS, commitID).exists()) {
             return null;
         }
-        File commitFile = join(Repository.COMMITS, commitID);
+        File commitFile = join(COMMITS, commitID);
         return readObject(commitFile, Commit.class);
     }
 
     public static Commit getCurrentCommit() {
-        return readObject(join(Repository.COMMITS, getCurrentCommitID()), Commit.class);
+        return readObject(join(COMMITS, getCurrentCommitID()), Commit.class);
     }
 
     public static String getCurrentCommitID() {
-        String head = readContentsAsString(Repository.HEAD);
-        File pointer = join(Repository.REFS_HEAD, head);
+        String head = readContentsAsString(HEAD);
+        File pointer = join(REFS_HEAD, head);
         return readContentsAsString(pointer);
     }
 
@@ -48,8 +48,8 @@ public class CommitsUtils {
     }
 
     public static void setHEAD(String commitID) {
-        String head = readContentsAsString(Repository.HEAD);
-        File pointer = join(Repository.REFS_HEAD, head);
+        String head = readContentsAsString(HEAD);
+        File pointer = join(REFS_HEAD, head);
         writeContents(pointer, commitID);
     }
 
@@ -129,7 +129,7 @@ public class CommitsUtils {
 
     public static boolean isUntracked(String filename) {
         assert filename != null;
-        List<String> files = plainFilenamesIn(Repository.CWD);
+        List<String> files = plainFilenamesIn(CWD);
         Commit currentCommit = getCurrentCommit();
         assert currentCommit != null && files != null;
         return files.contains(filename) && !currentCommit.getFileSnapshots().containsKey(filename);

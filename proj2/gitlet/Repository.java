@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static gitlet.Utils.*;
-
+import static gitlet.GitletConstants.*;
 /** Represents a gitlet repository.
  *  does at a high level.
  *  @author cyw
@@ -19,21 +19,10 @@ public class Repository {
      */
 
     /** The current working directory. */
-    public static final File CWD = new File(System.getProperty("user.dir"));
-    /** The .gitlet directory. */
-    public static final File GITLET_DIR = join(CWD, ".gitlet");
-
-    public static final File STAGING_AREA = join(GITLET_DIR, "staging_area");
-    public static final File BLOBS = join(GITLET_DIR, "blobs");
-    public static final File COMMITS = join(GITLET_DIR, "commits");
-    public static final File REFS = join(GITLET_DIR, "refs");
-    public static final File REFS_HEAD = join(REFS, "heads");
-    public static final File HEAD = join(GITLET_DIR, "HEAD");
 
     public static boolean isinitialized() {
         return GITLET_DIR.exists();
     }
-
 
     public static void init() {
         if (GITLET_DIR.exists()) {
@@ -141,24 +130,22 @@ public class Repository {
 
     public static void log() {
         Commit currentCommit = CommitsUtils.getCurrentCommit();
-        if (currentCommit.getSecondparent() != null) {
 
-        } else {
-            while (currentCommit != null) { // walk through the commit history
-                currentCommit.printCommitInfo();
-                if (currentCommit.getParent() == null) {
-                    break;
-                }
-                currentCommit = CommitsUtils.getCommit(currentCommit.getParent());
-             }
-        }
+        while (currentCommit != null) { // walk through the commit history
+            currentCommit.printCommitInfo();
+            if (currentCommit.getParent() == null) {
+                break;
+            }
+            currentCommit = CommitsUtils.getCommit(currentCommit.getParent());
+         }
+
     }
 
     public static void checkout(String[] strings) {
         if (strings.length == 1) {
             String branchName = strings[0];
             File head = join(REFS_HEAD, branchName);
-            String currentBranch = readContentsAsString(Repository.HEAD);
+            String currentBranch = readContentsAsString(HEAD);
             if (!head.exists()) {
                 System.out.println("No such branch exists.");
             } else if (currentBranch == branchName) {
@@ -178,7 +165,7 @@ public class Repository {
                     boolean currentHas = currentFilesnapshots.containsKey(filename);
                     boolean givenHas = givenFilesnapshots.containsKey(filename);
                     if (CommitsUtils.isUntracked(filename)) {
-                        System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                        System.out.println(MERGE_MODIFY_UNTRACKED_WARNING);
                         System.exit(0);
                     }
                     if (!isConsistent) {
@@ -193,7 +180,7 @@ public class Repository {
                 }
 
                 CommitsUtils.setHEAD(readContentsAsString(head));
-                writeContents(Repository.HEAD, branchName);
+                writeContents(HEAD, branchName);
                 StageUtils.saveStage();
             }
         } else if (strings.length == 2) {
@@ -267,7 +254,7 @@ public class Repository {
         List<String> branchesList = plainFilenamesIn(REFS_HEAD);
         branchesList = branchesList.stream().sorted().collect(Collectors.toList());
         for (String branch : branchesList) {
-            String head = readContentsAsString(Repository.HEAD);
+            String head = readContentsAsString(HEAD);
 
             if (branch.equals(head)) {
                 System.out.println("*" + branch);
@@ -338,7 +325,7 @@ public class Repository {
     public static void rmBranch(String branchname) {
         if (!join(REFS_HEAD, branchname).exists()) {
             System.out.println("A branch with that name does not exist.");
-        } else if (branchname.equals(readContentsAsString(Repository.HEAD))) {
+        } else if (branchname.equals(readContentsAsString(HEAD))) {
             System.out.println("Cannot remove the current branch.");
         } else {
             join(REFS_HEAD, branchname).delete();
@@ -368,7 +355,7 @@ public class Repository {
         if (!join(REFS_HEAD, givenbranch).exists()) {
             System.out.println("A branch with that name does not exist.");
             return;
-        } else if (givenbranch.equals(readContentsAsString(Repository.HEAD))) {
+        } else if (givenbranch.equals(readContentsAsString(HEAD))) {
             System.out.println("Cannot merge a branch with itself.");
             return;
         } else if (!StageUtils.isemptyStage()) {
@@ -401,7 +388,7 @@ public class Repository {
                     if (givenSnapshots.containsKey(path)) {
                         String fileID = sha1(readContents(join(CWD, path)));
                         if (!givenSnapshots.get(path).equals(fileID)) {
-                            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                            System.out.println(MERGE_MODIFY_UNTRACKED_WARNING);
                             return;
                         }
                     }
@@ -420,7 +407,7 @@ public class Repository {
                 // case 1,2: 010 011
                 if (!splitgivenConsistent && splitcurrentConsistent) {
                     if (CommitsUtils.isUntracked(fileName)) {
-                        System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                        System.out.println(MERGE_MODIFY_UNTRACKED_WARNING);
                         return;
                     }
                     if (!givenSnapshots.containsKey(fileName)) {
@@ -434,7 +421,7 @@ public class Repository {
 
                 if (!splitgivenConsistent && !splitcurrentConsistent && !currentgivenConsistent) {
                     if (CommitsUtils.isUntracked(fileName)) {
-                        System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                        System.out.println(MERGE_MODIFY_UNTRACKED_WARNING);
                         return;
                     }
                     File file = join(CWD, fileName);
@@ -446,7 +433,7 @@ public class Repository {
                     System.out.println("Encountered a merge conflict.");
                 }
 
-                commit("Merged " + givenbranch + " into " + readContentsAsString(Repository.HEAD) + ".");
+                commit("Merged " + givenbranch + " into " + readContentsAsString(HEAD) + ".");
                 Commit mergeCommit = CommitsUtils.getCurrentCommit();
                 mergeCommit.setSecondparent(CommitsUtils.getCommitID(givenCommit));
                 CommitsUtils.setHEAD(CommitsUtils.saveCommit(mergeCommit));

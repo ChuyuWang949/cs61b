@@ -2,28 +2,28 @@ package gitlet;
 
 import java.io.File;
 import java.util.TreeMap;
-
+import static gitlet.GitletConstants.*;
 import static gitlet.Utils.*;
 
 public class StageUtils {
     public static boolean isemptyStage() {
-        StagingArea index = readObject(Repository.STAGING_AREA, StagingArea.class);
+        StagingArea index = readObject(STAGING_AREA, StagingArea.class);
         return index.getAddedFile().isEmpty() && index.getRemovedFile().isEmpty();
     }
 
     public static void saveStage() {
-        writeObject(Repository.STAGING_AREA, new StagingArea());
+        writeObject(STAGING_AREA, new StagingArea());
     }
 
     public static StagingArea getStage() {
-        return readObject(Repository.STAGING_AREA, StagingArea.class);
+        return readObject(STAGING_AREA, StagingArea.class);
     }
 
     public static void saveBlobs(TreeMap<String, String> index) {
         for (String fileName : index.keySet()) {
             String fileID = index.get(fileName);
-            File blobFile = join(Repository.BLOBS, fileID);
-            String content = readContentsAsString(join(Repository.CWD, fileName));
+            File blobFile = join(BLOBS, fileID);
+            String content = readContentsAsString(join(CWD, fileName));
             writeContents(blobFile, content);
         }
     }
