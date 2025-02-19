@@ -8,26 +8,26 @@ import static gitlet.Utils.*;
 public class CommitsUtils {
     public static String saveCommit(Commit commit) {
         String commitID = getCommitID(commit);
-        File commitFile = join(Repository.commits, commitID);
+        File commitFile = join(Repository.COMMITS, commitID);
         writeObject(commitFile, commit);
         return commitID;
     }
 
     public static Commit getCommit(String commitID) {
-        if (!join(Repository.commits, commitID).exists()) {
+        if (!join(Repository.COMMITS, commitID).exists()) {
             return null;
         }
-        File commitFile = join(Repository.commits, commitID);
+        File commitFile = join(Repository.COMMITS, commitID);
         return readObject(commitFile, Commit.class);
     }
 
     public static Commit getCurrentCommit() {
-        return readObject(join(Repository.commits, getCurrentCommitID()), Commit.class);
+        return readObject(join(Repository.COMMITS, getCurrentCommitID()), Commit.class);
     }
 
     public static String getCurrentCommitID() {
         String head = readContentsAsString(Repository.HEAD);
-        File pointer = join(Repository.refs_heads, head);
+        File pointer = join(Repository.REFS_HEAD, head);
         return readContentsAsString(pointer);
     }
 
@@ -49,7 +49,7 @@ public class CommitsUtils {
 
     public static void setHEAD(String commitID) {
         String head = readContentsAsString(Repository.HEAD);
-        File pointer = join(Repository.refs_heads, head);
+        File pointer = join(Repository.REFS_HEAD, head);
         writeContents(pointer, commitID);
     }
 

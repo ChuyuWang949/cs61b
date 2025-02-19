@@ -23,7 +23,7 @@ public class StageUtils {
     public static void saveBlobs(TreeMap<String, String> index) {
         for (String fileName : index.keySet()) {
             String fileID = index.get(fileName);
-            File blobFile = join(Repository.blobs, fileID);
+            File blobFile = join(Repository.BLOBS, fileID);
             String content = readContentsAsString(join(Repository.CWD, fileName));
             writeContents(blobFile, content);
         }
