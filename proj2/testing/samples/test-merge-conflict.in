@@ -40,9 +40,12 @@ Encountered a merge conflict.
 > log
 ${COMMIT_LOG}
 ===
+commit ${MASTER_HEAD}
+${ARBLINES}
+<<<*
 > status
 === Branches ===
-*master
+\*master
 other
 
 === Staged Files ===
