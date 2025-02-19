@@ -108,7 +108,7 @@ public class Repository {
         TreeMap<String, String> indexAdded = index.getAddedFile();
         TreeMap<String, String> currentTracked = currentCommit.getFileSnapshots();
 
-        if (indexAdded.containsKey(fileName)) { // if the file is staged for addition
+        if (indexAdded.containsKey(fileName)) {
             index.removeFileFromAdded(fileName);
             if (currentTracked.containsKey(fileName)) {
                 index.addFileToRemoved(fileName);
@@ -120,14 +120,14 @@ public class Repository {
             index.addFileToRemoved(fileName);
             restrictedDelete(file);
         }
-        writeObject(STAGING_AREA, index); // dont forget to save the staging area
+        writeObject(STAGING_AREA, index);
 
     }
 
     public static void log() {
         Commit currentCommit = CommitsUtils.getCurrentCommit();
 
-        while (currentCommit != null) { // walk through the commit history
+        while (currentCommit != null) {
             currentCommit.printCommitInfo();
             if (currentCommit.getParent() == null) {
                 break;
@@ -157,6 +157,7 @@ public class Repository {
                 fileLists.addAll(currentFilesnapshots.keySet());
 
                 for (String filename : fileLists) {
+                    System.out.println(filename);
                     File file = join(CWD, filename);
                     boolean isConsistent = CommitsUtils.isConsistent(filename, currentCommit, givenCommit);
                     boolean currentHas = currentFilesnapshots.containsKey(filename);
@@ -166,18 +167,21 @@ public class Repository {
                         System.exit(0);
                     }
                     if (!isConsistent) {
+                        System.out.println(0);
                         if (currentHas && givenHas) {
+                            System.out.println(1);
                             writeContents(file, readContents(join(BLOBS, givenFilesnapshots.get(filename))));
                         } else if (currentHas) {
+                            System.out.println(2);
                             restrictedDelete(file);
                         } else {
+                            System.out.println(3);
                             writeContents(file, readContents(join(BLOBS, givenFilesnapshots.get(filename))));
                         }
                     }
                 }
-
-                CommitsUtils.setHEAD(readContentsAsString(head));
                 writeContents(HEAD, branchName);
+                CommitsUtils.setHEAD(readContentsAsString(head));
                 StageUtils.saveStage();
             }
         } else if (strings.length == 2) {

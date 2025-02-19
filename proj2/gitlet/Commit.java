@@ -55,8 +55,8 @@ public class Commit implements Serializable  {
         this.timestamp = timestamp;
     }
 
-    public void setFileSnapshots(TreeMap<String, String> Filesnapshots) {
-        this.fileSnapshots = Filesnapshots;
+    public void setFileSnapshots(TreeMap<String, String> fileSnapshots) {
+        this.fileSnapshots = fileSnapshots;
     }
 
     public void setParent(String parent) {
