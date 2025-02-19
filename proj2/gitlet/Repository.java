@@ -169,17 +169,26 @@ public class Repository {
                 TreeMap<String, String> currentFilesnapshots = currentCommit.getFileSnapshots();
                 TreeMap<String, String> givenFilesnapshots = givenCommit.getFileSnapshots();
 
-                for (String filename : givenFilesnapshots.keySet()) {
+                TreeSet<String> fileLists = new TreeSet<>(currentFilesnapshots.keySet());
+                fileLists.addAll(givenFilesnapshots.keySet());
+
+                for (String filename : fileLists) {
                     File file = join(CWD, filename);
                     boolean isConsistent = CommitsUtils.isConsistent(filename, currentCommit, givenCommit);
+                    boolean currentHas = currentFilesnapshots.containsKey(filename);
+                    boolean givenHas = givenFilesnapshots.containsKey(filename);
                     if (CommitsUtils.isUntracked(filename)) {
                         System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
                         System.exit(0);
                     }
-                    if (currentFilesnapshots.containsKey(filename) && !isConsistent) {
-                        writeContents(file, readContents(join(BLOBS, givenFilesnapshots.get(filename))));
-                    } else if (!currentFilesnapshots.containsKey(filename)) {
-                        restrictedDelete(file);
+                    if (!isConsistent) {
+                        if (currentHas && givenHas) {
+                            writeContents(file, readContents(join(BLOBS, givenFilesnapshots.get(filename))));
+                        } else if (currentHas) {
+                            restrictedDelete(file);
+                        } else {
+                            writeContents(file, readContents(join(BLOBS, givenFilesnapshots.get(filename))));
+                        }
                     }
                 }
 
