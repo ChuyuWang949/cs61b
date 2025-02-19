@@ -129,6 +129,7 @@ public class Repository {
             } else if (!currentTracked.containsKey(fileName)) {
                 System.out.println("No reason to remove the file.");
             }
+            writeObject(STAGING_AREA, index); // 忘记保存rm状态了
         }
     }
 
@@ -232,7 +233,7 @@ public class Repository {
         int flag = 0;
         for (String commitID : commitsList) {
             Commit commit = CommitsUtils.getCommit(commitID);
-            if (commit.getMessage().contains(message)) {
+            if (commit.getMessage().equals(message)) {
                 System.out.println(commitID);
                 flag += 1;
             }
