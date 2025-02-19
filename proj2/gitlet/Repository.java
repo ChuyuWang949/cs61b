@@ -254,7 +254,8 @@ public class Repository {
         branchesList = branchesList.stream().sorted().collect(Collectors.toList());
         for (String branch : branchesList) {
             String head = readContentsAsString(Repository.HEAD);
-            if (branch == head) {
+
+            if (branch.equals(head)) {
                 System.out.println("*" + branch);
             } else {
                 System.out.println(branch);
