@@ -38,10 +38,10 @@ public class CommitsUtils {
     public static TreeMap<String, String> mergeSnapshots(Commit currentCommit, StagingArea index) {
         TreeMap<String, String> mergedSnapshots = new TreeMap<>();
         if (currentCommit != null) {
-            mergedSnapshots.putAll(currentCommit.getFilesnapshots());
+            mergedSnapshots.putAll(currentCommit.getFileSnapshots());
         }
         mergedSnapshots.putAll(index.getAddedFile());
-        for(String fileName : index.getRemovedFile()) {
+        for (String fileName : index.getRemovedFile()) {
             mergedSnapshots.remove(fileName);
         }
         return mergedSnapshots;
@@ -91,13 +91,15 @@ public class CommitsUtils {
 
     public static boolean isConsistent(String filename, Commit currentCommit, Commit givenCommit) {
         assert currentCommit != null && givenCommit != null && filename != null;
-        if (currentCommit.getFilesnapshots().containsKey(filename) && givenCommit.getFilesnapshots().containsKey(filename)) {
-            if (currentCommit.getFilesnapshots().get(filename).equals(givenCommit.getFilesnapshots().get(filename))) {
+        TreeMap<String, String> currentSnapshots = currentCommit.getFileSnapshots();
+        TreeMap<String, String> givenSnapshots = givenCommit.getFileSnapshots();
+        if (currentSnapshots.containsKey(filename) && givenSnapshots.containsKey(filename)) {
+            if (currentSnapshots.get(filename).equals(givenSnapshots.get(filename))) {
                 return true;
             } else {
                 return false;
             }
-        } else if (!currentCommit.getFilesnapshots().containsKey(filename) && !givenCommit.getFilesnapshots().containsKey(filename)) {
+        } else if (!currentSnapshots.containsKey(filename) && !givenSnapshots.containsKey(filename)) {
             return true;
         } else {
             return false;
@@ -130,6 +132,6 @@ public class CommitsUtils {
         List<String> files = plainFilenamesIn(Repository.CWD);
         Commit currentCommit = getCurrentCommit();
         assert currentCommit != null && files != null;
-        return files.contains(filename) && !currentCommit.getFilesnapshots().containsKey(filename);
+        return files.contains(filename) && !currentCommit.getFileSnapshots().containsKey(filename);
     }
 }
