@@ -157,25 +157,19 @@ public class Repository {
                 fileLists.addAll(currentFilesnapshots.keySet());
 
                 for (String filename : fileLists) {
-                    System.out.println(filename);
                     File file = join(CWD, filename);
                     boolean isConsistent = CommitsUtils.isConsistent(filename, currentCommit, givenCommit);
                     boolean currentHas = currentFilesnapshots.containsKey(filename);
                     boolean givenHas = givenFilesnapshots.containsKey(filename);
                     if (CommitsUtils.isUntracked(filename)) {
                         System.out.println(MERGE_MODIFY_UNTRACKED_WARNING);
-                        System.exit(0);
                     }
                     if (!isConsistent) {
-                        System.out.println(0);
                         if (currentHas && givenHas) {
-                            System.out.println(1);
                             writeContents(file, readContents(join(BLOBS, givenFilesnapshots.get(filename))));
                         } else if (currentHas) {
-                            System.out.println(2);
                             restrictedDelete(file);
                         } else {
-                            System.out.println(3);
                             writeContents(file, readContents(join(BLOBS, givenFilesnapshots.get(filename))));
                         }
                     }
