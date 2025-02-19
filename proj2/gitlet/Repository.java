@@ -428,9 +428,9 @@ public class Repository {
                 if (!splitgivenConsistent && !splitcurrentConsistent && !currentgivenConsistent) {
                     File file = join(CWD, fileName);
                     String contentv1 = currentSnapshots.containsKey(fileName) ?
-                            readContentsAsString(join(BLOBS, currentSnapshots.get(fileName))) : "";
+                            readContentsAsString(join(BLOBS, currentSnapshots.get(fileName))) + "\n" : "";
                     String contentv2 = givenSnapshots.containsKey(fileName) ?
-                            readContentsAsString(join(BLOBS, givenSnapshots.get(fileName))) : "";
+                            readContentsAsString(join(BLOBS, givenSnapshots.get(fileName))) + "\n" : "";
                     String content = StageUtils.merge(contentv1, contentv2);
                     writeContents(file, content);
                     add(fileName);
