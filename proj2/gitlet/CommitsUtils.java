@@ -21,6 +21,15 @@ public class CommitsUtils {
         return readObject(commitFile, Commit.class);
     }
 
+    public static Commit getCommitabbreviate(String commitID) {
+        for (String filename : plainFilenamesIn(COMMITS)) {
+            if (filename.startsWith(commitID)) {
+                return getCommit(filename);
+            }
+        }
+        return null;
+    }
+
     public static Commit getCurrentCommit() {
         return readObject(join(COMMITS, getCurrentCommitID()), Commit.class);
     }
@@ -76,9 +85,11 @@ public class CommitsUtils {
     public static TreeMap<String, Integer> inDegree(TreeSet<String> commitIDs) {
         TreeMap<String, Integer> inDegree = new TreeMap<>();
         for (String commitID : commitIDs) {
+            inDegree.put(commitID, 0);
+        }
+        for (String commitID : commitIDs) {
             Commit commit = getCommit(commitID);
             assert commit != null;
-            inDegree.put(commitID, 0);
             if (commit.getParent() != null) {
                 inDegree.put(commit.getParent(), inDegree.get(commit.getParent()) + 1);
             }

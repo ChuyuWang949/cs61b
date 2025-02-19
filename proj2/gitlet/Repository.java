@@ -96,7 +96,6 @@ public class Repository {
             StageUtils.saveBlobs(index.getAddedFile()); // save the staged file to the blobs
 
             StageUtils.saveStage(); // clean and save the staging area
-
             setHEAD(saveCommit(newCommit));
         }
     }
@@ -200,7 +199,7 @@ public class Repository {
             if (!commitFile.exists()) {
                 System.out.println("No commit with that id exists.");
             } else {
-                Commit commit = getCommit(commitID);
+                Commit commit = commitID.length() == 6 ? getCommitabbreviate(commitID) : getCommit(commitID);
                 TreeMap<String, String> commitFilesnapshots = commit.getFileSnapshots();
                 if (commitFilesnapshots.containsKey(fileName)) {
                     File file = join(CWD, fileName);
@@ -371,24 +370,19 @@ public class Repository {
     public static void merge(String givenbranch) {
         if (!join(REFS_HEAD, givenbranch).exists()) {
             System.out.println("A branch with that name does not exist.");
-            return;
         } else if (givenbranch.equals(readContentsAsString(HEAD))) {
             System.out.println("Cannot merge a branch with itself.");
-            return;
         } else if (!StageUtils.isemptyStage()) {
             System.out.println("You have uncommitted changes.");
-            return;
         } else {
             Commit currentCommit = getCurrentCommit();
             Commit givenCommit = getCommit(readContentsAsString(join(REFS_HEAD, givenbranch)));
-
             if (isAncestor(currentCommit, givenCommit)) {
                 String[] args = {givenbranch};
                 checkout(args);
                 System.out.println("Current branch fast-forwarded.");
                 return;
             }
-
             if (isAncestor(givenCommit, currentCommit)) {
                 System.out.println("Given branch is an ancestor of the current branch.");
                 return;
@@ -398,9 +392,6 @@ public class Repository {
             TreeMap<String, String> currentSnapshots = currentCommit.getFileSnapshots();
             TreeMap<String, String> givenSnapshots = givenCommit.getFileSnapshots();
             for (String path : plainFilenamesIn(CWD)) { // all file in working directory
-                if (join(path).isDirectory()) {
-                    continue;
-                }
                 if (!currentSnapshots.containsKey(path)) {
                     if (givenSnapshots.containsKey(path)) {
                         String fileID = sha1(readContents(join(CWD, path)));
@@ -411,17 +402,13 @@ public class Repository {
                     }
                 }
             }
-            TreeSet<String> filesList = new TreeSet<>();
-            filesList.addAll(currentSnapshots.keySet());
+            TreeSet<String> filesList = new TreeSet<>(currentSnapshots.keySet());
             filesList.addAll(givenSnapshots.keySet());
             filesList.addAll(commonSnapshots.keySet());
-
             for (String fileName : filesList) {
                 Boolean splitgivenConsistent = isConsistent(fileName, splitPoint, givenCommit);
                 Boolean splitcurrentConsistent = isConsistent(fileName, splitPoint, currentCommit);
                 Boolean currentgivenConsistent = isConsistent(fileName, currentCommit, givenCommit);
-
-                // case 1,2: 010 011
                 if (!splitgivenConsistent && splitcurrentConsistent) {
                     if (isUntracked(fileName)) {
                         System.out.println(MERGE_MODIFY_UNTRACKED_WARNING);
@@ -435,21 +422,21 @@ public class Repository {
                         add(fileName);
                     }
                 }
-
                 if (!splitgivenConsistent && !splitcurrentConsistent && !currentgivenConsistent) {
                     if (isUntracked(fileName)) {
                         System.out.println(MERGE_MODIFY_UNTRACKED_WARNING);
                         return;
                     }
                     File file = join(CWD, fileName);
-                    String contentv1 = currentSnapshots.containsKey(fileName) ? readContentsAsString(join(CWD, fileName)) : "";
-                    String contentv2 = givenSnapshots.containsKey(fileName) ? readContentsAsString(join(CWD, fileName)) : "";
+                    String contentv1 = currentSnapshots.containsKey(fileName) ?
+                            readContentsAsString(join(CWD, fileName)) : "";
+                    String contentv2 = givenSnapshots.containsKey(fileName) ?
+                            readContentsAsString(join(CWD, fileName)) : "";
                     String content = StageUtils.merge(contentv1, contentv2);
                     writeContents(file, content);
                     add(fileName);
                     System.out.println("Encountered a merge conflict.");
                 }
-
                 commit("Merged " + givenbranch + " into " + readContentsAsString(HEAD) + ".");
                 Commit mergeCommit = getCurrentCommit();
                 mergeCommit.setSecondparent(getCommitID(givenCommit));
@@ -458,5 +445,3 @@ public class Repository {
         }
     }
 }
-
-
