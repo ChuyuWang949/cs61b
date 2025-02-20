@@ -81,8 +81,8 @@ public class Repository {
             System.out.println("Please enter a commit message.");
             System.exit(0);
         } else if (StageUtils.isemptyStage()) {
-                System.out.println("No changes added to the commit.");
-                System.exit(0);
+            System.out.println("No changes added to the commit.");
+            System.exit(0);
         } else {
             Commit newCommit = new Commit();
             Commit currentCommit = getCurrentCommit();
@@ -132,7 +132,7 @@ public class Repository {
                 break;
             }
             currentCommit = getCommit(currentCommit.getParent());
-         }
+        }
 
     }
 
@@ -165,11 +165,13 @@ public class Repository {
                     }
                     if (!isConsistent) {
                         if (currentHas && givenHas) {
-                            writeContents(file, readContents(join(BLOBS, givenFilesnapshots.get(filename))));
+                            String fileID = givenFilesnapshots.get(filename);
+                            writeContents(file, readContents(join(BLOBS, fileID)));
                         } else if (currentHas) {
                             restrictedDelete(file);
                         } else {
-                            writeContents(file, readContents(join(BLOBS, givenFilesnapshots.get(filename))));
+                            String fileID = givenFilesnapshots.get(filename);
+                            writeContents(file, fileID);
                         }
                     }
                 }
@@ -194,14 +196,15 @@ public class Repository {
             }
             String commitID = strings[0];
             String fileName = strings[2];
-            Commit commit = commitID.length() < 40 ? getCommitabbreviate(commitID) : getCommit(commitID);
+            Commit commit = commitID.length() < 40 ? getCommitabb(commitID) : getCommit(commitID);
             if (commit == null) {
                 System.out.println("No commit with that id exists.");
             } else {
                 TreeMap<String, String> commitFilesnapshots = commit.getFileSnapshots();
                 if (commitFilesnapshots.containsKey(fileName)) {
                     File file = join(CWD, fileName);
-                    writeContents(file, readContents(join(BLOBS, commitFilesnapshots.get(fileName))));
+                    String fileID = commitFilesnapshots.get(fileName);
+                    writeContents(file, readContents(join(BLOBS, fileID)));
                 } else {
                     System.out.println("File does not exist in that commit.");
                 }
@@ -427,16 +430,10 @@ public class Repository {
                 }
                 if (!splitgivenConsistent && !splitcurrentConsistent && !currentgivenConsistent) {
                     File file = join(CWD, fileName);
-                    StringBuilder conflictedContents = new StringBuilder("<<<<<<< HEAD\n");
-                    String currentCommitContent = currentSnapshots.containsKey(fileName) ?
-                            readContentsAsString(join(BLOBS, currentSnapshots.get(fileName))) : "";
-                    String branchCommitContent = givenSnapshots.containsKey(fileName) ?
-                            readContentsAsString(join(BLOBS, givenSnapshots.get(fileName))) : "";
-                    conflictedContents.append(currentCommitContent);
-                    conflictedContents.append("=======\n");
-                    conflictedContents.append(branchCommitContent);
-                    conflictedContents.append(">>>>>>>\n");
-                    writeContents(file, String.valueOf(conflictedContents));
+                    String currentCommitContent = getFileContent(fileName, currentCommit);
+                    String branchCommitContent = getFileContent(fileName, givenCommit);
+                    String conflictedContents = StageUtils.merge(currentCommitContent, branchCommitContent);
+                    writeContents(file, conflictedContents);
                     add(fileName);
                     flag = 1;
                 }
