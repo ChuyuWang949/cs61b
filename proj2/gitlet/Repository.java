@@ -427,12 +427,16 @@ public class Repository {
                 }
                 if (!splitgivenConsistent && !splitcurrentConsistent && !currentgivenConsistent) {
                     File file = join(CWD, fileName);
-                    String contentv1 = currentSnapshots.containsKey(fileName) ?
-                            readContentsAsString(join(BLOBS, currentSnapshots.get(fileName))) + "\n" : "";
-                    String contentv2 = givenSnapshots.containsKey(fileName) ?
-                            readContentsAsString(join(BLOBS, givenSnapshots.get(fileName))) + "\n" : "";
-                    String content = StageUtils.merge(contentv1, contentv2);
-                    writeContents(file, content);
+                    StringBuilder conflictedContents = new StringBuilder("<<<<<<< HEAD\n");
+                    String currentCommitContent = currentSnapshots.containsKey(fileName) ?
+                            readContentsAsString(join(BLOBS, currentSnapshots.get(fileName))) : "";
+                    String branchCommitContent = givenSnapshots.containsKey(fileName) ?
+                            readContentsAsString(join(BLOBS, givenSnapshots.get(fileName))) : "";
+                    conflictedContents.append(currentCommitContent);
+                    conflictedContents.append("=======\n");
+                    conflictedContents.append(branchCommitContent);
+                    conflictedContents.append(">>>>>>>\n");
+                    writeContents(file, String.valueOf(conflictedContents));
                     add(fileName);
                     flag = 1;
                 }
