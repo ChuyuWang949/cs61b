@@ -140,9 +140,8 @@ public class CommitsUtils {
         return files.contains(filename) && !currentCommit.getFileSnapshots().containsKey(filename);
     }
 
-    public static String getFileContent(String filename, Commit commit) {
-        assert filename != null && commit != null;
-        TreeMap<String, String> snapshots = commit.getFileSnapshots();
+    public static String getFileContent(String filename, TreeMap<String, String> snapshots) {
+        assert filename != null && snapshots != null;
         if (snapshots.containsKey(filename)) {
             return readContentsAsString(join(BLOBS, snapshots.get(filename)));
         } else {

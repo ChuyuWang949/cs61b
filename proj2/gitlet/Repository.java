@@ -27,7 +27,7 @@ public class Repository {
 
     public static void init() {
         if (GITLET_DIR.exists()) {
-            System.out.println("A Gitlet version-control system already exists in the current directory.");
+            System.out.println(ALREADY_EXISTS_WARNING);
         } else {
             GITLET_DIR.mkdir();
             BLOBS.mkdir();
@@ -171,7 +171,7 @@ public class Repository {
                             restrictedDelete(file);
                         } else {
                             String fileID = givenFilesnapshots.get(filename);
-                            writeContents(file, fileID);
+                            writeContents(file, readContents(join(BLOBS, fileID)));
                         }
                     }
                 }
@@ -430,10 +430,10 @@ public class Repository {
                 }
                 if (!splitgivenConsistent && !splitcurrentConsistent && !currentgivenConsistent) {
                     File file = join(CWD, fileName);
-                    String currentCommitContent = getFileContent(fileName, currentCommit);
-                    String branchCommitContent = getFileContent(fileName, givenCommit);
-                    String conflictedContents = StageUtils.merge(currentCommitContent, branchCommitContent);
-                    writeContents(file, conflictedContents);
+                    String currentContent = getFileContent(fileName, currentSnapshots);
+                    String branchContent = getFileContent(fileName, givenSnapshots);
+                    String mergeContents = StageUtils.merge(currentContent, branchContent);
+                    writeContents(file, mergeContents);
                     add(fileName);
                     flag = 1;
                 }
