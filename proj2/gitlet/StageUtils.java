@@ -29,6 +29,6 @@ public class StageUtils {
     }
 
     public static String merge(String contentv1, String contentv2) {
-        return "<<<<<<< HEAD\n" + contentv1 + "=======\n" + contentv2 + ">>>>>>>";
+        return "<<<<<<< HEAD\n" + contentv1 + "=======\n" + contentv2 + ">>>>>>>\n";
     }
 }
