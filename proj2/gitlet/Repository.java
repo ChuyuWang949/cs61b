@@ -64,8 +64,8 @@ public class Repository {
             if (currentRemoved.contains(fileName)) {
                 currentRemoved.remove(fileName);
             }
-
-            if (currentVersion.containsKey(fileName) && currentVersion.get(fileName).equals(fileID)) {
+            boolean currentHas = currentVersion.containsKey(fileName);
+            if (currentHas && currentVersion.get(fileName).equals(fileID)) {
                 if (currentAdded.containsKey(fileName)) {
                     index.removeFileFromAdded(fileName);
                 }
